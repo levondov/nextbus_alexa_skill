@@ -208,13 +208,3 @@ def lambda_handler(event, context):
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
         return on_session_ended(event['request'], event['session'])
-
-
-WhatsMyBusArrivalIntent when the next bus is coming at {stop}
-WhatsMyBusArrivalIntent when is the next bus coming at {stop}
-WhatsMyBusArrivalIntent when is the next bus leaving at {stop}
-WhatsMyBusArrivalIntent when the next buses are coming at {stop}
-WhatsMyBusArrivalIntent when are the next buses coming at {stop}
-WhatsMyBusArrivalIntent next bus at {stop}
-WhatsMyBusArrivalIntent for {stop}
-WhatsMyBusArrivalIntent {stop}
