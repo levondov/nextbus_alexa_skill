@@ -1,0 +1,16 @@
+{
+  "intents": [
+    {
+      "intent": "WhatsMyBusArrivalIntent",
+      "slots": [
+        {
+          "name": "stop",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+   	}
+  ]
+}

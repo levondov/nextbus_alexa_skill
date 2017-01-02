@@ -1,0 +1,8 @@
+WhatsMyBusArrivalIntent when the next bus is coming at {stop}
+WhatsMyBusArrivalIntent when is the next bus coming at {stop}
+WhatsMyBusArrivalIntent when is the next bus leaving at {stop}
+WhatsMyBusArrivalIntent when the next buses are coming at {stop}
+WhatsMyBusArrivalIntent when are the next buses coming at {stop}
+WhatsMyBusArrivalIntent next bus at {stop}
+WhatsMyBusArrivalIntent for {stop}
+WhatsMyBusArrivalIntent {stop}
