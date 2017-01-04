@@ -113,7 +113,7 @@ def get_bus_arrival_session(intent, session):
     reprompt_text = None
     intent_stopID = intent['slots']['stop']['value']
     
-    r = get_prediction(stopId=intent_stopID)
+    r = get_prediction('umd',stopId=intent_stopID)
     busObjs = parse_prediction(r)
     
     speech_output = ''
@@ -207,4 +207,4 @@ def lambda_handler(event, context):
     elif event['request']['type'] == "IntentRequest":
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
-        return on_session_ended(event['request'], event['session'])
+        return on_session_ended(event['request'], event['session']cd
