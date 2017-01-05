@@ -42,13 +42,19 @@ def build_response(session_attributes, speechlet_response):
     
     
 def bus_response(busObj):
+    #
+    #   bus_exists - 2x1 boolean list
+    #       bus_exists[0] - If the bus has an arrival time
+    #       bus_exists[1] - Does bus exists or is it an incorrect stopid
+    #
+    #
     if busObj['times'] and busObj['bus id']:
         # if there is a bus name and arrival time
         speech_output = 'The ' + busObj['bus id'] + ' '
         
         if busObj['direction']:
         # if there is a direction
-            speech_output = speech_output + 'heading towards ' + busObj['direction'] + ' will arrive in '
+            speech_output = speech_output + 'heading to ' + busObj['direction'] + ' will arrive in '
         
         else:
             speech_output = speech_output + 'will be arriving in '
@@ -64,15 +70,18 @@ def bus_response(busObj):
                 else:
                     speech_times = speech_times + times + ', '
         speech_output = speech_output + speech_times
+        bus_exists = [True, True]
     else:
         # no times available to post.
         if busObj['bus id']:
             # if a bus name and message is available
-            speech_output = 'No available times for the ' + busObj['bus id'] + ' bus. '
+            speech_output = '' # Does not matter as it will not be used
+            bus_exists = [False, True]
         else:
-            speech_output = 'There is something wrong with the stop ID you gave me, please try again.'
+            speech_output = 'I could not find a bus stop with the stop ID you gave me. '
+            bus_exists = [False, False]
         
-    return speech_output
+    return speech_output,bus_exists
 
 # --------------- Functions that control the skill's behavior ------------------
     
@@ -83,14 +92,14 @@ def get_welcome_response():
 
     session_attributes = {}
     card_title = "Welcome"
-    speech_output = "Welcome to the University of Maryland bus route alexa skill. " \
-                    "You can request arrival times for a specific stop by saying, " \
-                    "when is the next bus coming at stop ID."
+    speech_output = "Welcome to the bus updates skill for the amazon echo. " \
+                    "This skill will grab bus arrival times for the University of Maryland dots bus system, " \
+                    "To get started, you need to give me a bus stop ID to search. "
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
     reprompt_text = "You can find your bus stop's ID online at next bus's website. " \
                     "Once you have a bus stop ID you can make a request, for example, " \
-                    "when is the next bus coming at stop three zero nine six five."
+                    "when is the next bus coming at stop one zero zero zero one."
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -113,15 +122,41 @@ def get_bus_arrival_session(intent, session):
     reprompt_text = None
     intent_stopID = intent['slots']['stop']['value']
     
+    if intent_stopID is 'stop' or intent_stopID is 'cancel':
+        return handle_session_end_request()
+    
     r = get_prediction('umd',stopId=intent_stopID)
     busObjs = parse_prediction(r)
     
     speech_output = ''
+    buses_with_no_times = []
     for busObj in busObjs:
         # for each bus in the route get a response
-        response = bus_response(busObj)
-        speech_output = speech_output + response
+        response,bus_exists = bus_response(busObj)
+        if bus_exists[0]:
+        # bus has an arrival time, add it to speech_output
+            speech_output = speech_output + response
+        elif (not bus_exists[0]):
+        # no bus arrival time exists, check further
+            if bus_exists[1]:
+            # bus exists, but has no arrival time, add it to the list
+                buses_with_no_times.append(busObj['bus id'])
+            else:
+            # something is wrong with the stopID, break for loop and return message
+                speech_output = speech_output + response
+                return build_response(session_attributes, build_speechlet_response(
+        intent['name'], speech_output, reprompt_text, should_end_session))
+        
+    # Build and add in buses with no arrival times
+    speech_tmp = 'No available times for the '
+    for bus in buses_with_no_times:
+        if bus is buses_with_no_times[-1]:
+            speech_tmp = speech_tmp + 'and ' + bus + ' buses. '
+        else:
+            speech_tmp = speech_tmp + bus + ', '
             
+    speech_seasonal = ''
+    speech_output = speech_output + speech_tmp + speech_seasonal
 
     # Setting reprompt_text to None signifies that we do not want to reprompt
     # the user. If the user does not respond or says something that is not
@@ -207,4 +242,8 @@ def lambda_handler(event, context):
     elif event['request']['type'] == "IntentRequest":
         return on_intent(event['request'], event['session'])
     elif event['request']['type'] == "SessionEndedRequest":
-        return on_session_ended(event['request'], event['session']cd
+        return on_session_ended(event['request'], event['session'])
+
+
+
+
