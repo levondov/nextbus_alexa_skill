@@ -21,7 +21,7 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
         'card': {
             'type': 'Simple',
             'title': "Bus Times",
-            'content': output
+            'content': output + '\n Note most bus routes will return to normal schedules on January 22nd, after the winter break.'
         },
         'reprompt': {
             'outputSpeech': {
@@ -148,12 +148,15 @@ def get_bus_arrival_session(intent, session):
         intent['name'], speech_output, reprompt_text, should_end_session))
         
     # Build and add in buses with no arrival times
-    speech_tmp = 'No available times for the '
-    for bus in buses_with_no_times:
-        if bus is buses_with_no_times[-1]:
-            speech_tmp = speech_tmp + 'and ' + bus + ' buses. '
-        else:
-            speech_tmp = speech_tmp + bus + ', '
+    if buses_with_no_times:
+        speech_tmp = 'No available times for the '
+        for bus in buses_with_no_times:
+            if bus is buses_with_no_times[-1]:
+                speech_tmp = speech_tmp + 'and ' + bus + ' buses. '
+            else:
+                speech_tmp = speech_tmp + bus + ', '
+    else:
+        speech_tmp = ''
             
     speech_seasonal = ''
     speech_output = speech_output + speech_tmp + speech_seasonal
