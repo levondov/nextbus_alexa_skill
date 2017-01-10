@@ -105,9 +105,13 @@ def get_welcome_response():
         card_title, speech_output, reprompt_text, should_end_session))
 
 
-def handle_session_end_request():
+def handle_session_end_request(nostop_flag=False):
     card_title = "Session Ended"
-    speech_output = "Have a nice day!"
+    if nostop_flag:
+        speech_output = "I could not understand the phrase or stop ID you gave me. " \
+        "Take a look at next bus's website for valid stop IDs. You can look up phrases for this skill within the alexa app."
+    else:
+        speech_output = "Have a nice day!"
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
@@ -120,7 +124,11 @@ def get_bus_arrival_session(intent, session):
     should_end_session = 'True'
         
     reprompt_text = None
-    intent_stopID = intent['slots']['stop']['value']
+    try:
+        intent_stopID = intent['slots']['stop']['value']
+    except:
+        # no stop id given / means a bad phrase or id was said to alexa
+        return handle_session_end_request(nostop_flag=True)
     
     if intent_stopID is 'stop' or intent_stopID is 'cancel':
         return handle_session_end_request()
